@@ -79,6 +79,9 @@
                 </configuration>
             </plugin>
         </plugins>
+        <finalName>
+            syntechsia-common-service
+        </finalName>
     </build>
 
 </project>
