@@ -13,6 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 @Slf4j
 @Service
@@ -45,8 +46,13 @@ public class StudentServiceImpl implements StudentService {
         GlobalReponseDto<StudentEntity> response;
         StudentEntity studentEntity;
         try {
-            studentEntity = studentRepository.save(new StudentEntity(studentRegisterDto));
-            response = new GlobalReponseDto<>("00", "Success", studentEntity);
+            studentEntity = studentRepository.findByNik(studentRegisterDto.getNik());
+            if (ObjectUtils.isEmpty(studentEntity)) {
+                studentEntity = studentRepository.save(new StudentEntity(studentRegisterDto));
+                response = new GlobalReponseDto<>("00", "Success", studentEntity);
+            } else {
+                response = new GlobalReponseDto<>("01", "Failed", studentEntity);
+            }
         } catch (Exception e) {
             log.error("error save student {}", e.getMessage());
             return new GlobalReponseDto<>("01", "error save student ".concat(e.getMessage()), null);
