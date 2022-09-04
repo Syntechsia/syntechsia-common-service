@@ -1,11 +1,16 @@
 package com.syntechsiacommonservice.service.impl;
 
+import com.syntechsiacommonservice.config.RestConfig;
 import com.syntechsiacommonservice.entity.StudentEntity;
+import com.syntechsiacommonservice.model.request.EmailRequest;
 import com.syntechsiacommonservice.model.request.PagingRequestDto;
 import com.syntechsiacommonservice.model.request.StudentRegisterDto;
+import com.syntechsiacommonservice.model.response.EmailResponse;
 import com.syntechsiacommonservice.model.response.GlobalReponseDto;
 import com.syntechsiacommonservice.repository.StudentRepository;
 import com.syntechsiacommonservice.service.StudentService;
+import com.syntechsiacommonservice.util.ConstantUtil;
+import com.syntechsiacommonservice.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -21,9 +26,12 @@ public class StudentServiceImpl implements StudentService {
 
     private final StudentRepository studentRepository;
 
+    private final RestConfig restConfig;
+
     @Autowired
-    public StudentServiceImpl(StudentRepository studentRepository) {
+    public StudentServiceImpl(StudentRepository studentRepository, RestConfig restConfig) {
         this.studentRepository = studentRepository;
+        this.restConfig = restConfig;
     }
 
     @Override
@@ -49,13 +57,22 @@ public class StudentServiceImpl implements StudentService {
             studentEntity = studentRepository.findByNik(studentRegisterDto.getNik());
             if (ObjectUtils.isEmpty(studentEntity)) {
                 studentEntity = studentRepository.save(new StudentEntity(studentRegisterDto));
-                response = new GlobalReponseDto<>("00", "Success", studentEntity);
+                response = new GlobalReponseDto<>(ConstantUtil.SUCCESS_STATUS, ConstantUtil.SUCCESS, studentEntity);
+                EmailRequest request = new EmailRequest(studentEntity, ConstantUtil.REGISTER_TEMPLATE);
+                log.info("start send to email api {}", JsonUtil.getString(request));
+                EmailResponse emailResponse = (EmailResponse) restConfig.sendEmail(request);
+                if (emailResponse.getStatus().equals(ConstantUtil.SUCCESS_STATUS)) {
+                    studentEntity.setStatus(ConstantUtil.ACTIVATE);
+                    studentRepository.save(studentEntity);
+                } else {
+                    log.info("failed send email for request {}", JsonUtil.getString(request));
+                }
             } else {
-                response = new GlobalReponseDto<>("01", "Failed", studentEntity);
+                response = new GlobalReponseDto<>(ConstantUtil.FAILED_STATUS, ConstantUtil.FAILED, studentEntity);
             }
         } catch (Exception e) {
             log.error("error save student {}", e.getMessage());
-            return new GlobalReponseDto<>("01", "error save student ".concat(e.getMessage()), null);
+            return new GlobalReponseDto<>(ConstantUtil.FAILED_STATUS, "error save student ", null);
         }
         log.info("end save student");
         return response;

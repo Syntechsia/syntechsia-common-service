@@ -1,6 +1,7 @@
 package com.syntechsiacommonservice.entity;
 
 import com.syntechsiacommonservice.model.request.StudentRegisterDto;
+import com.syntechsiacommonservice.util.ConstantUtil;
 import com.syntechsiacommonservice.util.DateUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -49,7 +50,7 @@ public class StudentEntity {
         this.nik = studentRegisterDto.getNik();
         this.name = studentRegisterDto.getName();
         this.gender = studentRegisterDto.getGender();
-        this.dateOfBirth = DateUtil.stringToDate(studentRegisterDto.getDateOfBirth(), "dd-MM-yyyy");
+        this.dateOfBirth = DateUtil.stringToDate(studentRegisterDto.getDateOfBirth(), ConstantUtil.YYYMMDD);
         this.phoneNumber = studentRegisterDto.getPhoneNumber();
         this.email = studentRegisterDto.getEmail();
         this.education = studentRegisterDto.getEducation();

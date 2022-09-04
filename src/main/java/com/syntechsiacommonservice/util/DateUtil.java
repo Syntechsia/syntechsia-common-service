@@ -49,4 +49,20 @@ public class DateUtil {
         }
         return false;
     }
+
+    public static String changeDateFormat(String date, String oldFormat, String newFormat) {
+        try {
+            SimpleDateFormat oldSdf = new SimpleDateFormat(oldFormat);
+            oldSdf.setLenient(false);
+            Date result = oldSdf.parse(date);
+
+            SimpleDateFormat newSdf = new SimpleDateFormat(newFormat);
+            newSdf.setLenient(false);
+
+            return newSdf.format(result);
+        } catch (Exception ex) {
+            log.error("Change date format error", ex);
+        }
+        return null;
+    }
 }
