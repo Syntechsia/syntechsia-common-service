@@ -12,7 +12,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
-@CrossOrigin
+@CrossOrigin(origins = {
+        "https://syntechsia.com/*",
+        "http://103.214.112.174:3030/*"
+})
 @RestController
 @RequestMapping("/student")
 public class StudentController {
