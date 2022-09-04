@@ -9,14 +9,12 @@ import com.syntechsiacommonservice.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
-@CrossOrigin(origins = {
-        "https://syntechsia.com",
-        "http://103.214.112.174:3030",
-        "http://103.214.112.174:8081"
-})
 @RestController
 @RequestMapping("/student")
 public class StudentController {
