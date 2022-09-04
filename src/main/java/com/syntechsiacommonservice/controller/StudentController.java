@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @CrossOrigin(origins = {
-        "https://syntechsia.com/*",
-        "http://103.214.112.174:3030/*",
-        "http://103.214.112.174:8081/"
+        "https://syntechsia.com",
+        "http://103.214.112.174:3030",
+        "http://103.214.112.174:8081"
 })
 @RestController
 @RequestMapping("/student")
