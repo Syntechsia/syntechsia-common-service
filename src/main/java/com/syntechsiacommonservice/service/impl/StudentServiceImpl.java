@@ -51,21 +51,25 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public GlobalReponseDto<StudentEntity> save(StudentRegisterDto studentRegisterDto) {
-        GlobalReponseDto<StudentEntity> response;
+        GlobalReponseDto<StudentEntity> response = null;
         StudentEntity studentEntity;
         try {
             studentEntity = studentRepository.findByNik(studentRegisterDto.getNik());
             if (ObjectUtils.isEmpty(studentEntity)) {
                 studentEntity = studentRepository.save(new StudentEntity(studentRegisterDto));
-                response = new GlobalReponseDto<>(ConstantUtil.SUCCESS_STATUS, ConstantUtil.SUCCESS, studentEntity);
-                EmailRequest request = new EmailRequest(studentEntity, ConstantUtil.REGISTER_TEMPLATE);
-                log.info("start send to email api {}", JsonUtil.getString(request));
-                EmailResponse emailResponse = (EmailResponse) restConfig.sendEmail(request);
-                if (emailResponse.getStatus().equals(ConstantUtil.SUCCESS_STATUS)) {
-                    studentEntity.setStatus(ConstantUtil.ACTIVATE);
-                    studentRepository.save(studentEntity);
+                if (!ObjectUtils.isEmpty(studentEntity)) {
+                    EmailRequest request = new EmailRequest(studentEntity, ConstantUtil.REGISTER_TEMPLATE);
+                    log.info("start send to email api {}", JsonUtil.getString(request));
+                    EmailResponse emailResponse = (EmailResponse) restConfig.sendEmail(request);
+                    if (emailResponse.getStatus().equals(ConstantUtil.SUCCESS_STATUS)) {
+                        studentEntity.setStatus(ConstantUtil.ACTIVATE);
+                        studentRepository.save(studentEntity);
+                        response = new GlobalReponseDto<>(ConstantUtil.SUCCESS_STATUS, ConstantUtil.SUCCESS, studentEntity);
+                    } else {
+                        log.info("failed send email for request {}", JsonUtil.getString(request));
+                    }
                 } else {
-                    log.info("failed send email for request {}", JsonUtil.getString(request));
+                    response = new GlobalReponseDto<>(ConstantUtil.FAILED_STATUS, ConstantUtil.FAILED, studentEntity);
                 }
             } else {
                 response = new GlobalReponseDto<>(ConstantUtil.FAILED_STATUS, ConstantUtil.FAILED, studentEntity);
