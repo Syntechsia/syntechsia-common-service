@@ -58,7 +58,7 @@ public class StudentServiceImpl implements StudentService {
         try {
             studentEntity = studentRepository.findByNik(studentRegisterDto.getNik());
             if (!ObjectUtils.isEmpty(studentEntity)) {
-                return new GlobalReponseDto<>(ConstantUtil.FAILED_STATUS, "NIK/PASSPORT/NISN : ".concat(studentEntity.getNik()).concat("sudah terdaftar"), studentEntity);
+                return new GlobalReponseDto<>(ConstantUtil.FAILED_STATUS, "NIK/PASSPORT/NISN : ".concat(studentEntity.getNik()).concat(" sudah terdaftar"), studentEntity);
             }
 
             studentEntity = studentRepository.save(new StudentEntity(studentRegisterDto, ConstantUtil.FAILED));
