@@ -72,13 +72,14 @@ public class StudentServiceImpl implements StudentService {
                 studentEntity.setStatus(ConstantUtil.PENDING);
                 studentEntity.setStatusSendEmail(ConstantUtil.SUCCESS);
                 studentRepository.save(studentEntity);
-                response = new GlobalReponseDto<>(ConstantUtil.SUCCESS_STATUS, "Berhasil daftar silahkan check email untuk proses selanjutnya, segera hubungi admin jika mendapatkan email", studentEntity);
+                response = new GlobalReponseDto<>(ConstantUtil.SUCCESS_STATUS, "Berhasil daftar silahkan check email untuk proses selanjutnya", studentEntity);
             } else {
+                response = new GlobalReponseDto<>(ConstantUtil.SUCCESS_STATUS, "Berhasil daftar silahkan check email untuk proses selanjutnya, segera hubungi admin jika tidak mendapatkan email", studentEntity);
                 log.info("failed send email for request {}", JsonUtil.getString(emailRequest));
             }
         } catch (Exception e) {
             log.error("error save student {}", e.getMessage());
-            return new GlobalReponseDto<>(ConstantUtil.FAILED_STATUS, "Gagal mendaftar silahkan coba kembali, atau hubungi admin", null);
+            return new GlobalReponseDto<>(ConstantUtil.FAILED_STATUS, "Gagal mendaftar silahkan coba kembali atau hubungi admin", null);
         }
         log.info("end save student");
         return response;
