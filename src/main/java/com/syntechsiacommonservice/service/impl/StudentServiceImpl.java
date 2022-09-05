@@ -52,31 +52,33 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public GlobalReponseDto<StudentEntity> save(StudentRegisterDto studentRegisterDto) {
         GlobalReponseDto<StudentEntity> response = null;
+        EmailResponse emailResponse = new EmailResponse();
+        EmailRequest emailRequest = null;
         StudentEntity studentEntity;
         try {
             studentEntity = studentRepository.findByNik(studentRegisterDto.getNik());
-            if (ObjectUtils.isEmpty(studentEntity)) {
-                studentEntity = studentRepository.save(new StudentEntity(studentRegisterDto));
-                if (!ObjectUtils.isEmpty(studentEntity)) {
-                    EmailRequest request = new EmailRequest(studentEntity, ConstantUtil.REGISTER_TEMPLATE);
-                    log.info("start send to email api {}", JsonUtil.getString(request));
-                    EmailResponse emailResponse = (EmailResponse) restConfig.sendEmail(request);
-                    if (emailResponse.getStatus().equals(ConstantUtil.SUCCESS_STATUS)) {
-                        studentEntity.setStatus(ConstantUtil.ACTIVATE);
-                        studentRepository.save(studentEntity);
-                        response = new GlobalReponseDto<>(ConstantUtil.SUCCESS_STATUS, ConstantUtil.SUCCESS, studentEntity);
-                    } else {
-                        log.info("failed send email for request {}", JsonUtil.getString(request));
-                    }
-                } else {
-                    response = new GlobalReponseDto<>(ConstantUtil.FAILED_STATUS, ConstantUtil.FAILED, studentEntity);
-                }
+            if (!ObjectUtils.isEmpty(studentEntity)) {
+                return new GlobalReponseDto<>(ConstantUtil.FAILED_STATUS, "NIK/PASSPORT/NISN : ".concat(studentEntity.getNik()).concat("sudah terdaftar"), studentEntity);
+            }
+
+            studentEntity = studentRepository.save(new StudentEntity(studentRegisterDto, ConstantUtil.FAILED));
+            if (!ObjectUtils.isEmpty(studentEntity)) {
+                emailRequest = new EmailRequest(studentEntity, ConstantUtil.REGISTER_TEMPLATE);
+                log.info("start send to email api {}", JsonUtil.getString(emailRequest));
+                emailResponse = (EmailResponse) restConfig.sendEmail(emailRequest);
+            }
+
+            if (emailResponse.getStatus().equals(ConstantUtil.SUCCESS_STATUS)) {
+                studentEntity.setStatus(ConstantUtil.PENDING);
+                studentEntity.setStatusSendEmail(ConstantUtil.SUCCESS);
+                studentRepository.save(studentEntity);
+                response = new GlobalReponseDto<>(ConstantUtil.SUCCESS_STATUS, "Berhasil daftar silahkan check email untuk proses selanjutnya, segera hubungi admin jika mendapatkan email", studentEntity);
             } else {
-                response = new GlobalReponseDto<>(ConstantUtil.FAILED_STATUS, ConstantUtil.FAILED, studentEntity);
+                log.info("failed send email for request {}", JsonUtil.getString(emailRequest));
             }
         } catch (Exception e) {
             log.error("error save student {}", e.getMessage());
-            return new GlobalReponseDto<>(ConstantUtil.FAILED_STATUS, "error save student ", null);
+            return new GlobalReponseDto<>(ConstantUtil.FAILED_STATUS, "Gagal mendaftar silahkan coba kembali, atau hubungi admin", null);
         }
         log.info("end save student");
         return response;
